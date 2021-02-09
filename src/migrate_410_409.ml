@@ -309,6 +309,8 @@ and copy_pattern_desc :
       Ast_409.Parsetree.Ppat_exception (copy_pattern x0)
   | Ast_410.Parsetree.Ppat_extension x0 ->
       Ast_409.Parsetree.Ppat_extension (copy_extension x0)
+  | Ast_410.Parsetree.Ppat_effect (x0, x1) -> 
+      Ast_409.Parsetree.Ppat_effect (copy_pattern x0, copy_pattern x1)
   | Ast_410.Parsetree.Ppat_open (x0, x1) ->
       Ast_409.Parsetree.Ppat_open
         ((copy_loc copy_Longident_t x0), (copy_pattern x1))
@@ -459,6 +461,8 @@ and copy_structure_item_desc :
       Ast_409.Parsetree.Pstr_typext (copy_type_extension x0)
   | Ast_410.Parsetree.Pstr_exception x0 ->
       Ast_409.Parsetree.Pstr_exception (copy_type_exception x0)
+  | Ast_410.Parsetree.Pstr_effect x0 ->
+      Ast_409.Parsetree.Pstr_effect (copy_effect_constructor x0)
   | Ast_410.Parsetree.Pstr_module x0 ->
       Ast_409.Parsetree.Pstr_module (copy_module_binding x0)
   | Ast_410.Parsetree.Pstr_recmodule x0 ->
@@ -724,6 +728,8 @@ and copy_signature_item_desc :
       Ast_409.Parsetree.Psig_typext (copy_type_extension x0)
   | Ast_410.Parsetree.Psig_exception x0 ->
       Ast_409.Parsetree.Psig_exception (copy_type_exception x0)
+  | Ast_410.Parsetree.Psig_effect x0 ->
+      Ast_409.Parsetree.Psig_effect (copy_effect_constructor x0)
   | Ast_410.Parsetree.Psig_module x0 ->
       Ast_409.Parsetree.Psig_module (copy_module_declaration x0)
   | Ast_410.Parsetree.Psig_modsubst x0 ->
@@ -1030,6 +1036,38 @@ and copy_extension_constructor_kind :
         ((copy_constructor_arguments x0), (map_option copy_core_type x1))
   | Ast_410.Parsetree.Pext_rebind x0 ->
       Ast_409.Parsetree.Pext_rebind (copy_loc copy_Longident_t x0)
+and copy_effect_constructor :
+  Ast_410.Parsetree.effect_constructor ->
+    Ast_409.Parsetree.effect_constructor
+  =
+  fun
+    { Ast_410.Parsetree.peff_name = peff_name;
+      Ast_410.Parsetree.peff_kind = peff_kind;
+      Ast_410.Parsetree.peff_loc = peff_loc;
+      Ast_410.Parsetree.peff_attributes = peff_attributes }
+     ->
+    {
+      Ast_409.Parsetree.peff_name =
+        (copy_loc (fun x  -> x) peff_name);
+      Ast_409.Parsetree.peff_kind =
+        (copy_effect_constructor_kind peff_kind);
+      Ast_409.Parsetree.peff_loc = (copy_location peff_loc);
+      Ast_409.Parsetree.peff_attributes =
+        (copy_attributes peff_attributes)
+    }
+
+and copy_effect_constructor_kind :
+  Ast_410.Parsetree.effect_constructor_kind ->
+    Ast_409.Parsetree.effect_constructor_kind
+  =
+  function
+  | Ast_410.Parsetree.Peff_decl (x0,x1) ->
+      Ast_409.Parsetree.Peff_decl
+        ((List.map copy_core_type x0),
+          (copy_core_type x1))
+  | Ast_410.Parsetree.Peff_rebind x0 ->
+      Ast_409.Parsetree.Peff_rebind
+        (copy_loc copy_Longident_t x0)
 and copy_type_declaration :
   Ast_410.Parsetree.type_declaration -> Ast_409.Parsetree.type_declaration =
   fun

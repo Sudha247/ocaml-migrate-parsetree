@@ -330,6 +330,8 @@ and copy_pattern_desc :
       To.Parsetree.Ppat_exception (copy_pattern x0)
   | From.Parsetree.Ppat_extension x0 ->
       To.Parsetree.Ppat_extension (copy_extension x0)
+  | From.Parsetree.Ppat_effect (x0, x1) -> 
+      To.Parsetree.Ppat_effect (copy_pattern x0, copy_pattern x1)
   | From.Parsetree.Ppat_open (x0,x1) ->
       To.Parsetree.Ppat_open
         ((copy_loc copy_longident x0),
@@ -508,6 +510,8 @@ and copy_structure_item_desc :
                    x0.From.Parsetree.ptyexn_constructor in
          { e with pext_attributes = e.pext_attributes @ (copy_attributes x0.ptyexn_attributes) }
         )
+  | From.Parsetree.Pstr_effect x0 ->
+      To.Parsetree.Pstr_effect (copy_effect_constructor x0)
   | From.Parsetree.Pstr_module x0 ->
       To.Parsetree.Pstr_module
         (copy_module_binding x0)
@@ -847,6 +851,8 @@ and copy_signature_item_desc :
         (let e = copy_extension_constructor
                    x0.From.Parsetree.ptyexn_constructor in
          {e with pext_attributes = e.pext_attributes @ (copy_attributes x0.ptyexn_attributes) })
+  | From.Parsetree.Psig_effect x0 ->
+      To.Parsetree.Psig_effect (copy_effect_constructor x0)
   | From.Parsetree.Psig_module x0 ->
       To.Parsetree.Psig_module
         (copy_module_declaration x0)
@@ -1198,6 +1204,38 @@ and copy_extension_constructor_kind :
           (copy_option copy_core_type x1))
   | From.Parsetree.Pext_rebind x0 ->
       To.Parsetree.Pext_rebind
+        (copy_loc copy_longident x0)
+and copy_effect_constructor :
+  From.Parsetree.effect_constructor ->
+    To.Parsetree.effect_constructor
+  =
+  fun
+    { From.Parsetree.peff_name = peff_name;
+      From.Parsetree.peff_kind = peff_kind;
+      From.Parsetree.peff_loc = peff_loc;
+      From.Parsetree.peff_attributes = peff_attributes }
+     ->
+    {
+      To.Parsetree.peff_name =
+        (copy_loc (fun x  -> x) peff_name);
+      To.Parsetree.peff_kind =
+        (copy_effect_constructor_kind peff_kind);
+      To.Parsetree.peff_loc = (copy_location peff_loc);
+      To.Parsetree.peff_attributes =
+        (copy_attributes peff_attributes)
+    }
+
+and copy_effect_constructor_kind :
+  From.Parsetree.effect_constructor_kind ->
+    To.Parsetree.effect_constructor_kind
+  =
+  function
+  | From.Parsetree.Peff_decl (x0,x1) ->
+      To.Parsetree.Peff_decl
+        ((List.map copy_core_type x0),
+          (copy_core_type x1))
+  | From.Parsetree.Peff_rebind x0 ->
+      To.Parsetree.Peff_rebind
         (copy_loc copy_longident x0)
 
 and copy_type_declaration :
